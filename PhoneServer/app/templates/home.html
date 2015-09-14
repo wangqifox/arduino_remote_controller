@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+
+	<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+	<!-- <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css"> -->
+
+	<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+	<script src="/static/js/jquery.min.js"></script>
+
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="/static/js/bootstrap.min.js"></script>
+
+	<title>Home</title>
+</head>
+<body>
+	<div class="container">
+		<div class="page-header">
+			<h1>Arduino控制</h1>
+			<table style="width: 100%">
+				<tr>
+					<td>序列号：{{token}}</td>
+					<td><a href="logout">登出</a></td>
+				</tr>
+			</table>
+		</div>
+		<table style="width: 100%; margin: 10px">
+			<tr>
+				<td>震动：</td>
+				<td><button type="button" class="btn btn-primary" command="1" onclick="send_command(this)">发送</button></td>
+			</tr>
+			<tr>
+				<td>长震动：</td>
+				<td><button type="button" class="btn btn-primary" command="2" onclick="send_command(this)">发送</button></td>
+			</tr>
+		</table>
+	</div>
+</body>
+<script type="text/javascript">
+
+	function send_command(obj) {
+		command = $(obj).attr('command')
+		console.log(command)
+		$.ajax({
+			type: 'POST',
+			url: 'add_action',
+			data: {action_id:command},
+			success: function(data) {
+				if(data.success == 'true') {
+					alert(data.msg);
+				} else {
+					alert(data.msg);
+				}
+			},
+			error: function() {
+				alert('服务器出错');
+			}
+		});
+	}
+	
+
+</script>
+</html>
