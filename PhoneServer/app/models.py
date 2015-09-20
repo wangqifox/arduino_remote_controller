@@ -18,10 +18,10 @@ class BaseModel(Model):
 	class Meta:
 		database = database
 
-class Action(BaseModel):
-	description = CharField(max_length=255)
-	class Meta:
-		db_table = 'action'
+# class Action(BaseModel):
+# 	description = CharField(max_length=255)
+# 	class Meta:
+# 		db_table = 'action'
 
 class Token(BaseModel):
 	token = CharField(max_length=255)
@@ -31,7 +31,12 @@ class Token(BaseModel):
 class ActionList(BaseModel):
 	create_time = DateTimeField()
 	token = ForeignKeyField(Token, db_column='token_id')
-	action = ForeignKeyField(Action, db_column='action_id')
+	# action = ForeignKeyField(Action, db_column='action_id')
+	action_mode = IntegerField()
+	speed = IntegerField()
+	direction = BooleanField()
+	frequency = IntegerField()
+
 	class Meta:
 		db_table = 'action_list'
 

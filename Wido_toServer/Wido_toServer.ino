@@ -11,16 +11,25 @@
 
 Adafruit_CC3000 WiDo = Adafruit_CC3000(WiDo_CS, WiDo_IRQ, WiDo_VBAT, SPI_CLOCK_DIVIDER);
 
-#define WLAN_SSID "TPLINK-50CE50RT"
-#define WLAN_PASS "13656676494"
+#define WLAN_SSID "TP-LINK_6DBA"
+#define WLAN_PASS "Yuedream12345"
 
 #define WLAN_SECURITY WLAN_SEC_WPA2
 #define TIMEOUT_MS  3000
 
 #define TOKEN "gsdfg"
 
+int pinI1 = 8;
+int pinI2 = 9;
+int speedpin = 11;
+
 void setup() {
   // put your setup code here, to run once:
+  pinMode(pinI1, OUTPUT);
+  pinMode(pinI2, OUTPUT);
+  pinMode(speedpin, OUTPUT);
+
+  
   Serial.begin(115200);
    while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
@@ -70,44 +79,10 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   static Adafruit_CC3000_Client tcpClient;
-  
-//  if(tcpClient.connected()) {
-//    Serial.println("start...");
-//    
-//    char clientString[70];
-////    int sensValue = 100;
-////    sprintf(clientString,"%s%s%s%d%s","GET /data?token=",TOKEN,"&param=",sensValue," HTTP/1.1");
-////    Serial.println(clientString);
-//    sprintf(clientString, "%s=%s", "token", TOKEN);
-//    Serial.println(clientString);
-//
-//    tcpClient.fastrprintln(clientString);
-//
-//    Serial.println("============");
-//
-//    unsigned long lastRead = millis();
-//    while(tcpClient.connected() && (millis() - lastRead < TIMEOUT_MS)) {
-//      while(tcpClient.available()) {
-//        char c = tcpClient.read();
-//        Serial.print(c);
-//        lastRead = millis();
-//      }
-//    }
-//    
-////    tcpClient.close();
-//    delay(1000);
-//  }
-//  else {
-//    delay(1000);
-//    Serial.println("Connecting to Server...");
-//    uint32_t ip = WiDo.IP2U32(192,168,0,109);
-//    tcpClient = WiDo.connectTCP(ip, 5000);
-//    
-//  }
 
 
   Serial.println("Connecting to Server...");
-  uint32_t ip = WiDo.IP2U32(192,168,0,109);
+  uint32_t ip = WiDo.IP2U32(192,168,0,105);
   tcpClient = WiDo.connectTCP(ip, 5000);
   delay(1000);
 
@@ -146,32 +121,103 @@ void loop() {
     Serial.print("command: ");
     Serial.println(command);
 
-    int commandId = getCommandId(command);
-    Serial.print("commandId:");
-    Serial.println(commandId);
+    runCommand(command);
+
+//    int commandId = getCommandId(command);
+//    Serial.print("commandId:");
+//    Serial.println(commandId);
     
 //    tcpClient.close();
-    delay(1000);
+//    delay(1000);
   }
     
 tcpClient.close();
   
 }
 
-int getCommandId(String command)
+void getCommands(String command, int command_list[])
 {
+//  int command_list[5];
+  int command_index = 0;
   int commandId = 0;
   int index = 0;
-  while(command[index] != '#')
+  
+  
+    
+  while(1)
   {
-    if(command[index] >= '0' && command[index] <= '9')
+    Serial.print("index: ");
+    Serial.println(index);
+    Serial.println(command[index]);
+    if(command[index] == '|')
     {
-//      Serial.print(command[index]);
+      Serial.print("commandId: ");
+      Serial.println(commandId);
+      command_list[command_index] = commandId;
+      command_index++;
+      commandId = 0;
+    }
+    else if(command[index] == '#')
+    {
+      Serial.print("commandId: ");
+      Serial.println(commandId);
+      command_list[command_index] = commandId;
+      command_index++;
+      commandId = 0;
+      break;
+    }
+    else if(command[index] >= '0' && command[index] <= '9')
+    {
       commandId = commandId * 10 + command[index] - '0';
     }
     index++;
   }
-  return commandId;
+
+//  return commandId;
+}
+
+void setSpeed(int speed)
+{
+  analogWrite(speedpin, speed);
+}
+
+void setDirection(int direction)
+{
+  if(direction == 0) {
+    digitalWrite(pinI1, LOW);
+    digitalWrite(pinI2, HIGH);
+  }
+  else if(direction == 1) {
+    digitalWrite(pinI1, HIGH);
+    digitalWrite(pinI2, LOW);
+  }
+}
+
+void setFrequency(int frequecy) {
+  
+}
+
+void runCommand(String command)
+{
+  int command_list[5];
+  getCommands(command, command_list);
+  int action_mode = command_list[0];
+  if(action_mode == 1) {
+    int speed = command_list[1];
+    int direction = command_list[2];
+    setSpeed(speed);
+    setDirection(direction);
+  }
+  else if(action_mode == 2) {
+    int frequency = command_list[1];
+    
+  }
+//  for(int i = 0 ; i < 5 ; i++)
+//  {
+//    Serial.print(i);
+//    Serial.print(" ");
+//    Serial.println(command_list[i]);
+//  }
 }
 
 void displayDriverMode(void)

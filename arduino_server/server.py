@@ -21,15 +21,15 @@ conn = MySQLdb.connect(
 cur = conn.cursor()
 
 def getCommand(token):
-    sql = 'select action_list.id, action_list.action_id, action_list.create_time from action_list join token where action_list.token_id = token.id and token.token = "%s" order by create_time' % token
+    sql = 'select action_list.id, action_list.action_mode, action_list.speed, action_list.direction, action_list.frequency from action_list join token where action_list.token_id = token.id and token.token = "%s" order by create_time' % token
     print sql
     cur.execute(sql)
     action_list = cur.fetchall()
     print action_list
     if len(action_list) == 0:
-        return 0, 0
+        return 0, 0, 0, 0, 0
     else:
-        return action_list[0][0], action_list[0][1]
+        return action_list[0][0], action_list[0][1], action_list[0][2], action_list[0][3], action_list[0][4]
 
 def delCommand(command_id):
     sql = 'delete from action_list where id = %d' % command_id
@@ -55,9 +55,14 @@ def echo(socket, address):
             break
         token = line.split('=')[1].strip()
         print token
-        command_id, command = getCommand(token)
-        print "====", command_id, command
-        line = "*%d#" % command
+        command_id, action_mode, speed, direction, frequency = getCommand(token)
+        print "====", command_id, action_mode, speed, direction, frequency
+        line = "*0#"
+        if action_mode == 1:
+            line = "*%d|%d|%d#" % (action_mode, speed, direction)
+        elif action_mode == 2:
+            line = "*%d|%d#" % (action_mode, frequency) 
+
         print 'line', line
         socket.sendall(line)
         delCommand(command_id)

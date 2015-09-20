@@ -63,20 +63,24 @@ def add_action():
 	增加动作
 	'''
 	r = request.args if request.method == 'GET' else request.form
-	action_id = r.get('action_id')
-
-	print action_id, g.token
+	action_mode = r.get('action_mode')
+	speed = r.get('speed')
+	direction = r.get('direction')
+	frequency = r.get('frequency')
+	direction = 1 if direction == 'true' else 0
+	print action_mode, speed, direction, frequency, g.token
 	try:
 		token = Token.get(Token.token==g.token)
-		action = Action.get(Action.id==action_id)
+		# action = Action.get(Action.id==action_id)
 		create_time = datetime.datetime.today()
-		actionlist = ActionList(create_time=create_time, token=token, action=action)
+
+		actionlist = ActionList(create_time=create_time, token=token, action_mode=action_mode, speed=speed, direction=direction, frequency=frequency)
 		actionlist.save()
 		result = setSuccessMsg('命令发送成功')
 	except Token.DoesNotExist:
 		result = setErrorMsg('序列号错误')
-	except Action.DoesNotExist:
-		result = setErrorMsg('没有这个命令')
+	# except Action.DoesNotExist:
+	# 	result = setErrorMsg('没有这个命令')
 	except Exception as e:
 		print e
 		result = setErrorMsg('命令发送失败')
